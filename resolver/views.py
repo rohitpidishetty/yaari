@@ -288,64 +288,64 @@ def yaari_two_step_verification(req):
             msg["To"] = verify
             msg["Subject"] = "Yaari, 2 step email verification"
             ref.child(f"{username}/").update({"otp":code})
-message = f"""
-<html>
-<head>
-    <style>
-        body {{
-            font-family: 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, rgba(18, 104, 202, 0.08), rgba(3, 167, 167, 0.08));
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }}
-        .container {{
-            max-width: 600px;
-            margin: auto;
-            padding: 2rem;
-            border-radius: 20px;
-            background: linear-gradient(135deg, rgba(18, 104, 202, 0.15), rgba(3, 167, 167, 0.15));
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(35, 103, 126, 0.3);
-            box-shadow: 0 4px 12px rgba(0, 128, 128, 0.2);
-            text-align: center;
-        }}
-        h2 {{
-            color: #00b3b3;
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-        }}
-        .code-box {{
-            display: inline-block;
-            background-color: #e0f7f7;
-            color: #333;
-            font-size: 28px;
-            letter-spacing: 4px;
-            padding: 12px 24px;
-            border-radius: 12px;
-            margin-top: 10px;
-            font-weight: bold;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }}
-        .footer {{
-            margin-top: 30px;
-            font-size: 12px;
-            color: #777;
-        }}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>YAARI Email Verification</h2>
-        <div class="code-box">{code}</div>
-        <div class="footer">
-            This is an auto-generated email from <strong>YAARI</strong>. Please do not reply.
-        </div>
-    </div>
-</body>
-</html>
-"""
+            message = f"""
+            <html>
+            <head>
+                <style>
+                    body {{
+                        font-family: 'Segoe UI', 'Roboto', sans-serif;
+                        background: linear-gradient(135deg, rgba(18, 104, 202, 0.08), rgba(3, 167, 167, 0.08));
+                        margin: 0;
+                        padding: 20px;
+                        color: #333;
+                    }}
+                    .container {{
+                        max-width: 600px;
+                        margin: auto;
+                        padding: 2rem;
+                        border-radius: 20px;
+                        background: linear-gradient(135deg, rgba(18, 104, 202, 0.15), rgba(3, 167, 167, 0.15));
+                        backdrop-filter: blur(12px);
+                        -webkit-backdrop-filter: blur(12px);
+                        border: 1px solid rgba(35, 103, 126, 0.3);
+                        box-shadow: 0 4px 12px rgba(0, 128, 128, 0.2);
+                        text-align: center;
+                    }}
+                    h2 {{
+                        color: #00b3b3;
+                        font-size: 1.8rem;
+                        margin-bottom: 10px;
+                    }}
+                    .code-box {{
+                        display: inline-block;
+                        background-color: #e0f7f7;
+                        color: #333;
+                        font-size: 28px;
+                        letter-spacing: 4px;
+                        padding: 12px 24px;
+                        border-radius: 12px;
+                        margin-top: 10px;
+                        font-weight: bold;
+                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+                    }}
+                    .footer {{
+                        margin-top: 30px;
+                        font-size: 12px;
+                        color: #777;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h2>YAARI Email Verification</h2>
+                    <div class="code-box">{code}</div>
+                    <div class="footer">
+                        This is an auto-generated email from <strong>YAARI</strong>. Please do not reply.
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
 
 
             msg.attach(MIMEText(message, "html"))
