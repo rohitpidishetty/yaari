@@ -13,9 +13,9 @@ from google.auth.transport.requests import Request
 import re
 import numpy as np
 from django.http import JsonResponse
-import tensorflow as tf
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing import sequence
+# import tensorflow as tf
+# from tensorflow.keras.preprocessing.text import Tokenizer
+# from tensorflow.keras.preprocessing import sequence
 
 
 
@@ -241,7 +241,7 @@ def yaari_hoax_auditor(req):
       body = req.body.decode('utf-8')
       data = json.loads(body)
       text = data['text']
-      data = predict(text)+" news"
-      return JsonResponse({"status": data})
+      # data = predict(text)+" news"
+      return JsonResponse({"status": text})
     except Exception as e:
       return JsonResponse({"status": 500, "err": str(e)})
