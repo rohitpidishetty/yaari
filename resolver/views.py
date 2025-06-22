@@ -18,7 +18,7 @@ from google.auth.transport.requests import Request
 # from tensorflow.keras.preprocessing import sequence
 
 # Load Firebase credentials from environment variable (as JSON string)
-firebase_creds_json = os.getenv("FIREBASE")
+firebase_creds_json = os.getenv("FIREBASE_SERVICE_ACCOUNT")
 if not firebase_creds_json:
     raise Exception("FIREBASE environment variable not set")
 
