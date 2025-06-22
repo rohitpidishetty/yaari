@@ -275,7 +275,7 @@ EMAIL_ADDRESS = os.getenv("EMAIL")
 EMAIL_PASSWORD = os.getenv("EMAIL_KEY")
 
 @csrf_exempt
-def mail(req):
+def yaari_two_step_verification(req):
     if req.method == 'POST':
         body = json.loads(request.body)
         verify = body['verify_email']
