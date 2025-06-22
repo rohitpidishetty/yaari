@@ -356,4 +356,4 @@ def yaari_two_step_verification(req):
         except Exception as e:
             return JsonResponse({"status": 400, 'err': str(e)})
 
-    return JsonResponse({"status": 200})
+    return JsonResponse({"status": 500})
