@@ -17,13 +17,11 @@ from google.auth.transport.requests import Request
 # from tensorflow.keras.preprocessing.text import Tokenizer
 # from tensorflow.keras.preprocessing import sequence
 
-# Load Firebase credentials from environment variable (as JSON string)
-firebase_creds_json = os.getenv("FIREBASE_SERVICE_ACCOUNT")
-if not firebase_creds_json:
-    raise Exception("FIREBASE environment variable not set")
+raw_env = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+service_account_info = json.loads(raw_env.replace('\\n', '\n'))
 
-cred_dict = json.loads(firebase_creds_json)
-cred = credentials.Certificate(cred_dict)
+
+cred = credentials.Certificate(service_account_info)
 
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred, {
@@ -34,7 +32,7 @@ ref = db.reference('users/')
 
 def get_access_token():
     credentials = service_account.Credentials.from_service_account_info(
-        cred_dict, scopes=['https://www.googleapis.com/auth/firebase.messaging']
+        service_account_info, scopes=['https://www.googleapis.com/auth/firebase.messaging']
     )
     credentials.refresh(Request())
     return credentials.token
