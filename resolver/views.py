@@ -274,73 +274,74 @@ SMTP_PORT = 587
 EMAIL_ADDRESS = os.getenv("EMAIL")
 EMAIL_PASSWORD = os.getenv("EMAIL_KEY")
 
+import random
 @csrf_exempt
 def yaari_two_step_verification(req):
     if req.method == 'POST':
         body = json.loads(req.body)
         verify = body['verify_email']
+        username = body['username']
         try:
+            code = random.randint(10000, 99999)
             msg = MIMEMultipart()
             msg["From"] = EMAIL_ADDRESS
             msg["To"] = verify
             msg["Subject"] = "Yaari, 2 step email verification"
-
+            ref.child(f"{username}/").update({"otp":code})
             message = f"""
-            <html>
-                <head>
-                    <style>
-                        body {{
-                            font-family: Arial, sans-serif;
-                            background-color: #f4f4f9;
-                            margin: 0;
-                            padding: 20px;
-                            color: #333;
-                        }}
-                        .container {{
-                            max-width: 600px;
-                            background-color: #ffffff;
-                            padding: 20px;
-                            border-radius: 8px;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                            margin: auto;
-                        }}
-                        h2 {{
-                            color: #4CAF50;
-                            text-align: center;
-                        }}
-                        .info {{
-                            margin-bottom: 15px;
-                            padding: 10px;
-                            background-color: #f9f9f9;
-                            border-left: 4px solid #4CAF50;
-                        }}
-                        pre {{
-                            background-color: #eee;
-                            padding: 10px;
-                            border-radius: 5px;
-                            overflow-x: auto;
-                            white-space: pre-wrap;
-                            word-wrap: break-word;
-                        }}
-                        .footer {{
-                            text-align: center;
-                            color: #999;
-                            font-size: 12px;
-                            margin-top: 20px;
-                        }}
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <h2>Email verification code</h2>
-                        <p>12334</p>
-                        <div class="footer">
-                            This is an auto-generated email. Please do not reply.
+                    <html>
+                    <head>
+                        <style>
+                            body {{
+                                font-family: 'Segoe UI', 'Roboto', sans-serif;
+                                background-color: #f1f7fa;
+                                margin: 0;
+                                padding: 20px;
+                                color: #333;
+                            }}
+                            .container {{
+                                max-width: 600px;
+                                background-color: #ffffff;
+                                padding: 24px;
+                                border-radius: 10px;
+                                box-shadow: 0 4px 12px rgba(0, 128, 128, 0.15);
+                                margin: auto;
+                                border: 1px solid #e0f0f0;
+                            }}
+                            h2 {{
+                                color: #00b3b3;
+                                text-align: center;
+                                margin-bottom: 10px;
+                            }}
+                            h3 {{
+                                color: #333;
+                                text-align: center;
+                                font-size: 28px;
+                                letter-spacing: 2px;
+                                background-color: #e0f7f7;
+                                display: inline-block;
+                                padding: 12px 24px;
+                                border-radius: 8px;
+                            }}
+                            .footer {{
+                                text-align: center;
+                                color: #777;
+                                font-size: 12px;
+                                margin-top: 30px;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <h2>YAARI Email Verification</h2>
+                            <h3>{code}</h3>
+                            <div class="footer">
+                                This is an auto-generated email from <strong>YAARI</strong>. Please do not reply.
+                            </div>
                         </div>
-                    </div>
-                </body>
-            </html>
-            """
+                    </body>
+                    </html>
+                    """
 
             msg.attach(MIMEText(message, "html"))
 
