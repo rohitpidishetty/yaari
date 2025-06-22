@@ -262,3 +262,98 @@ def yaari_hoax_auditor(req):
         except Exception as e:
             return JsonResponse({"status": 500, "error": str(e)})
     return JsonResponse({"status": 500})
+
+
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
+EMAIL_ADDRESS = os.getenv("EMAIL")
+EMAIL_PASSWORD = os.getenv("EMAIL_KEY")
+
+@csrf_exempt
+def mail(req):
+    if req.method == 'POST':
+        body = json.loads(request.body)
+        verify = body['verify_email']
+        try:
+            msg = MIMEMultipart()
+            msg["From"] = EMAIL_ADDRESS
+            msg["To"] = verify
+            msg["Subject"] = "Yaari, 2 step email verification"
+
+            message = f"""
+            <html>
+                <head>
+                    <style>
+                        body {{
+                            font-family: Arial, sans-serif;
+                            background-color: #f4f4f9;
+                            margin: 0;
+                            padding: 20px;
+                            color: #333;
+                        }}
+                        .container {{
+                            max-width: 600px;
+                            background-color: #ffffff;
+                            padding: 20px;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                            margin: auto;
+                        }}
+                        h2 {{
+                            color: #4CAF50;
+                            text-align: center;
+                        }}
+                        .info {{
+                            margin-bottom: 15px;
+                            padding: 10px;
+                            background-color: #f9f9f9;
+                            border-left: 4px solid #4CAF50;
+                        }}
+                        pre {{
+                            background-color: #eee;
+                            padding: 10px;
+                            border-radius: 5px;
+                            overflow-x: auto;
+                            white-space: pre-wrap;
+                            word-wrap: break-word;
+                        }}
+                        .footer {{
+                            text-align: center;
+                            color: #999;
+                            font-size: 12px;
+                            margin-top: 20px;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h2>Email verification code</h2>
+                        <p>12334</p>
+                        <div class="footer">
+                            This is an auto-generated email. Please do not reply.
+                        </div>
+                    </div>
+                </body>
+            </html>
+            """
+
+            msg.attach(MIMEText(message, "html"))
+
+            # Send email
+            server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+            server.starttls()
+            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+            server.sendmail(EMAIL_ADDRESS, verify, msg.as_string())
+            server.quit()
+
+            return JsonResponse({"status": 200})
+
+        except Exception as e:
+            return JsonResponse({"status": 400, 'err': str(e)})
+
+    return JsonResponse({"status": 200})
