@@ -23,6 +23,7 @@ from resolver.views import yaari_assoc_chat_id
 from resolver.views import yaari_notify
 from resolver.views import yaari_hoax_auditor
 from resolver.views import yaari_action_notify
+from resolver.views import yaari_two_step_verification
 
 urlpatterns = [
     path('admin/', admin.site.urls),
