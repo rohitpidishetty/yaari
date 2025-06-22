@@ -37,33 +37,29 @@ def get_access_token():
     credentials.refresh(Request())
     return credentials.token
 
-def notify(token, title, body):
-    access_token = get_access_token()
-    url = 'https://fcm.googleapis.com/v1/projects/yaari-jud/messages:send'
-    headers = {
-        'Authorization': f'Bearer {access_token}',
-        'Content-Type': 'application/json; UTF-8',
-    }
-    payload = {
-        "message": {
-            "token": token,
-            "notification": {
-                "title": title,
-                "body": body,
-            },
-            "webpush": {
-                "notification": {
-                    "icon": "https://yaari-jud.web.app/assets/logo.png"
-                }
-            }
-        }
-    }
-    response = requests.post(url, headers=headers, json=payload)
-    try:
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        print(f"Notification send failed: {e} - {response.text}")
-    return response
+from django.views.decorators.http import require_http_methods
+
+@csrf_exempt
+@require_http_methods(["POST", "OPTIONS"])
+def yaari_notify(req):
+    if req.method == "OPTIONS":
+        # Reply to preflight with 200 OK and empty body
+        return JsonResponse({}, status=200)
+    
+    if req.method == "POST":
+        try:
+            body = req.body.decode('utf-8')
+            jsonified = json.loads(body)
+            device_id = jsonified['deviceId']
+            user_message = jsonified['user_message']
+            author = jsonified['author']
+            res = notify(device_id, f"Yaari, {author} has sent you a message", user_message)
+            return JsonResponse({"status": 200, "res": res.json()})
+        except Exception as e:
+            return JsonResponse({"status": 400, "error": str(e)})
+
+    # Fallback for other methods
+    return JsonResponse({"status": 405, "error": "Method not allowed"})
 
 @csrf_exempt
 def yaari_assoc(req):
