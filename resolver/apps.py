@@ -10,15 +10,16 @@ from google.oauth2 import service_account
 from google.cloud import storage
 
 
-path = json.loads(os.getenv("FIREBASE_SERVICE_ACCOUNT"))
-cred = credentials.Certificate(path)
+raw_env = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+service_account_info = json.loads(raw_env.replace('\\n', '\n'))
+cred = credentials.Certificate(service_account_info)
 
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://yaari-jud-default-rtdb.firebaseio.com/'
     })
 
-credentials_gcs = service_account.Credentials.from_service_account_info(path)
+credentials_gcs = service_account.Credentials.from_service_account_info(service_account_info)
 client = storage.Client(project='yaari-jud', credentials=credentials_gcs)
 
 ref = db.reference('convos/')
