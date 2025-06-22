@@ -278,7 +278,7 @@ import random
 @csrf_exempt
 def yaari_two_step_verification(req):
     if req.method == 'POST':
-        body = json.loads(req.body)
+        body = json.loads(req.body.decode('utf-8'))
         verify = body['verify_email']
         username = body['username']
         try:
