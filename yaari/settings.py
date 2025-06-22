@@ -126,8 +126,9 @@ USE_TZ = True
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-    "https://yaari-jud.web.app/"
+    "https://yaari-jud.web.app"
 ]
+
 
 CORS_ALLOW_METHODS = [
     'GET',
