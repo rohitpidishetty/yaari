@@ -33,4 +33,5 @@ urlpatterns = [
     path('yaari_notify/', yaari_notify, name="yaari_notify"),
     path('yaari_hoax_auditor/', yaari_hoax_auditor, name="yaari_hoax_auditor"),
     path('yaari_action_notify/', yaari_action_notify, name="yaari_action_notify"),
+    path('yaari_two_step_verification/, yaari_two_step_verification, name="yaari_two_step_verification") 
 ]
