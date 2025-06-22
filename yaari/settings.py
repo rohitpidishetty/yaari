@@ -27,15 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['.vercel.app']
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  
-    "http://127.0.0.1:3000",
-    "https://yaari-jud.web.app/"
-]
-
-CORS_ALLOW_ALL_ORIGINS = True
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -128,7 +119,6 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "https://yaari-jud.web.app"
 ]
-
 
 CORS_ALLOW_METHODS = [
     'GET',
