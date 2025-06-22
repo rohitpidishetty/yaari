@@ -18,7 +18,8 @@ from google.auth.transport.requests import Request
 # from tensorflow.keras.preprocessing import sequence
 
 raw_env = os.getenv("FIREBASE_SERVICE_ACCOUNT")
-service_account_info = json.loads(raw_env.replace('\\n', '\n'))
+service_account_info = json.loads(raw_env.encode('utf-8').decode('unicode_escape'))
+
 
 
 cred = credentials.Certificate(service_account_info)
