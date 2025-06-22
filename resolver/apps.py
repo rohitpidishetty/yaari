@@ -10,7 +10,7 @@ from google.oauth2 import service_account
 from google.cloud import storage
 
 
-path = json.loads(os.getenv("FIREBASE"))
+path = json.loads(os.getenv("FIREBASE_SERVICE_ACCOUNT"))
 cred = credentials.Certificate(path)
 
 if not firebase_admin._apps:
