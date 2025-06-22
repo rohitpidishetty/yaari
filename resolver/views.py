@@ -263,6 +263,23 @@ def yaari_hoax_auditor(req):
             return JsonResponse({"status": 500, "error": str(e)})
     return JsonResponse({"status": 500})
 
+@csrf_exempt
+def yaari_two_step_verify(req):
+    if req.method == "POST":
+        try:
+            body = req.body.decode('utf-8')
+            data = json.loads(body)
+            otp = str(data['otp'])
+            user = data['username']
+            sent_otp = str(ref.child(f"{user}/otp").get())
+            if otp == sent_otp:
+                return JsonResponse({"status": 200})
+            else:
+                return JsonResponse({"status": 300})
+            return JsonResponse({"status": text})
+        except Exception as e:
+            return JsonResponse({"status": 400, "error": str(e)})
+    return JsonResponse({"status": 500})
 
 import smtplib
 from email.mime.text import MIMEText
