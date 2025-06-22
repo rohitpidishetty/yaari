@@ -3,14 +3,16 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 import firebase_admin
-from firebase_admin import credentials, db, messaging  
+from firebase_admin import credentials, db
 import os
 import hashlib
 import requests
 import re
 import numpy as np
+from google.oauth2 import service_account
+from google.auth.transport.requests import Request
 
-# ML imports commented out, uncomment if you add tensorflow and keras dependencies
+# ML imports commented out — uncomment if you add tensorflow and keras dependencies
 # import tensorflow as tf
 # from tensorflow.keras.preprocessing.text import Tokenizer
 # from tensorflow.keras.preprocessing import sequence
@@ -31,16 +33,11 @@ if not firebase_admin._apps:
 ref = db.reference('users/')
 
 def get_access_token():
-    credentials = firebase_admin.credentials.Certificate(cred_dict)
-    # Or use google.oauth2.service_account if preferred:
-    # from google.oauth2 import service_account
-    # from google.auth.transport.requests import Request
-    # credentials = service_account.Credentials.from_service_account_info(cred_dict, scopes=['https://www.googleapis.com/auth/firebase.messaging'])
-    # credentials.refresh(Request())
-    # return credentials.token
-    # But since you already have firebase_admin, you can do:
-    access_token = firebase_admin._apps.get('')[1].get_access_token().access_token
-    return access_token
+    credentials = service_account.Credentials.from_service_account_info(
+        cred_dict, scopes=['https://www.googleapis.com/auth/firebase.messaging']
+    )
+    credentials.refresh(Request())
+    return credentials.token
 
 def notify(token, title, body):
     access_token = get_access_token()
@@ -64,6 +61,10 @@ def notify(token, title, body):
         }
     }
     response = requests.post(url, headers=headers, json=payload)
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        print(f"Notification send failed: {e} - {response.text}")
     return response
 
 @csrf_exempt
