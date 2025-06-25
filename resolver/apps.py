@@ -12,7 +12,7 @@ from google.cloud import storage
 
 raw_env = os.getenv("FIREBASE_SERVICE_ACCOUNT")
 service_account_info = json.loads(raw_env.encode('utf-8').decode('unicode_escape'))
-
+print(service_account_info)
 cred = credentials.Certificate(service_account_info)
 
 if not firebase_admin._apps:
@@ -31,7 +31,7 @@ def auto_deletion():
     global last_run_date
     while True:
         now = datetime.now()
-        if now.hour == 9 and now.minute >= 55:
+        if now.hour == 10 and now.minute >= 1:
             today = now.date()
             if last_run_date != today:
                 try:
@@ -39,7 +39,7 @@ def auto_deletion():
                     for bucket in entries.keys():
                         ref.child(f"{bucket}/").update({"chat": "{}"})
 
-                    bucket_name = "yaari-jud.appspot.com"
+                    bucket_name = "yaari-jud.firebasestorage.app"
                     bucket = client.get_bucket(bucket_name)
                     blobs = bucket.list_blobs()
                     for b in blobs:
