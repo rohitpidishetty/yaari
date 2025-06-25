@@ -28,7 +28,7 @@ ref = db.reference('convos/')
 def auto_deletion():
     while True:
         now = datetime.now()
-        if now.hour == 9 and now.minute == 47:
+        if now.hour == 9 and now.minute >= 47:
             try:
                 entries = ref.get() or {}
                 for bucket in entries.keys():
