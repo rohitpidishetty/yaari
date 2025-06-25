@@ -31,7 +31,7 @@ def auto_deletion():
     global last_run_date
     while True:
         now = datetime.now()
-        if now.hour == 9 and now.minute >= 50:
+        if now.hour == 9 and now.minute >= 55:
             today = now.date()
             if last_run_date != today:
                 try:
@@ -54,13 +54,17 @@ def auto_deletion():
             time.sleep(10)
 
 
+auto_deletion_started = False
+auto_deletion_lock = threading.Lock()
+
 class ResolverConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'resolver'
 
     def ready(self):
-        # Prevent starting multiple threads if ready() called multiple times
-        if not hasattr(self, 'auto_deletion_thread'):
-            thread = threading.Thread(target=auto_deletion, daemon=True)
-            thread.start()
-            self.auto_deletion_thread = thread
+        global auto_deletion_started
+        with auto_deletion_lock:
+            if not auto_deletion_started:
+                thread = threading.Thread(target=auto_deletion, daemon=True)
+                thread.start()
+                auto_deletion_started = True
