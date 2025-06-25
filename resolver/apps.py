@@ -25,25 +25,34 @@ client = storage.Client(project='yaari-jud', credentials=credentials_gcs)
 
 ref = db.reference('convos/')
 
+last_run_date = None
+
 def auto_deletion():
+    global last_run_date
     while True:
         now = datetime.now()
-        if now.hour == 9 and now.minute >= 47:
-            try:
-                entries = ref.get() or {}
-                for bucket in entries.keys():
-                    ref.child(f"{bucket}/").update({"chat": "{}"})
-                bucket_name = "yaari-jud.firebasestorage.app"
-                bucket = client.get_bucket(bucket_name)
-                blobs = bucket.list_blobs()
-                for b in blobs:
-                    if b.name.startswith('YaariChatUploads') and b.name != 'YaariChatUploads/':
-                        b.delete()
-            except Exception as e:
-                print(f"Error during auto deletion: {e}")
-            time.sleep(60)  # Sleep to avoid multiple deletes in the same minute
+        if now.hour == 9 and now.minute >= 50:
+            today = now.date()
+            if last_run_date != today:
+                try:
+                    entries = ref.get() or {}
+                    for bucket in entries.keys():
+                        ref.child(f"{bucket}/").update({"chat": "{}"})
+
+                    bucket_name = "yaari-jud.appspot.com"
+                    bucket = client.get_bucket(bucket_name)
+                    blobs = bucket.list_blobs()
+                    for b in blobs:
+                        if b.name.startswith('YaariChatUploads') and b.name != 'YaariChatUploads/':
+                            b.delete()
+                    print(f"Auto-deletion completed at {now}")
+                    last_run_date = today
+                except Exception as e:
+                    print(f"Error during auto deletion: {e}")
+            time.sleep(60)
         else:
             time.sleep(10)
+
 
 class ResolverConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
