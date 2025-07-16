@@ -119,7 +119,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = ["https://yaari-jud.web.app", 
                         "https://yaari-dba.web.app",
-                        # "http://localhost:3000/"
+                        "http://localhost:3000/"
                        ]
 
 CORS_ALLOW_METHODS = [
