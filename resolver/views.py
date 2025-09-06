@@ -7,10 +7,12 @@ from firebase_admin import credentials, db
 import os
 import hashlib
 import requests
-import re
+import re, math
 import numpy as np
 from google.oauth2 import service_account
+import sys
 from google.auth.transport.requests import Request
+from django.views.decorators.http import require_http_methods
 
 # ML imports commented out — uncomment if you add tensorflow and keras dependencies
 # import tensorflow as tf
@@ -21,6 +23,9 @@ raw_env = os.getenv("FIREBASE_SERVICE_ACCOUNT")
 service_account_info = json.loads(raw_env.encode('utf-8').decode('unicode_escape'))
 
 
+# # Testing
+# file = open('./sk.json', 'r')
+# service_account_info = json.load(file)
 
 cred = credentials.Certificate(service_account_info)
 
@@ -37,9 +42,6 @@ def get_access_token():
     )
     credentials.refresh(Request())
     return credentials.token
-
-from django.views.decorators.http import require_http_methods
-
 
 def notify(token, title, body):
   access_token = get_access_token()
@@ -64,8 +66,6 @@ def notify(token, title, body):
   }
 
   return requests.post(url, headers=headers, data=json.dumps(payload))
-
-
 
 @csrf_exempt
 def yaari_assoc(req):
@@ -186,7 +186,6 @@ def yaari_assoc_chat_id(req):
             return JsonResponse({"status": 400, "error": str(e)})
     return JsonResponse({"status": 500})
 
-
 @csrf_exempt
 @require_http_methods(["POST", "OPTIONS"])
 def yaari_notify(req):
@@ -280,17 +279,16 @@ def yaari_two_step_verify(req):
             return JsonResponse({"status": 400, "error": str(e)})
     return JsonResponse({"status": 500})
 
+import random
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 EMAIL_ADDRESS = os.getenv("EMAIL")
 EMAIL_PASSWORD = os.getenv("EMAIL_KEY")
 
-import random
 @csrf_exempt
 def yaari_two_step_verification(req):
     if req.method == 'POST':
@@ -378,4 +376,43 @@ def yaari_two_step_verification(req):
         except Exception as e:
             return JsonResponse({"status": 400, 'err': str(e)})
 
+    return JsonResponse({"status": 500})
+
+def haversine_formula(lat1, lon1, lat2, lon2):
+    R = 6371.0
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    delta_phi = math.radians(lat2 - lat1)
+    delta_lambda = math.radians(lon2 - lon1)
+    a = math.sin(delta_phi / 2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance = R * c
+    # Returning distance in KM
+    return distance
+  
+@csrf_exempt
+def yaari_suggestions(req):
+    if req.method == "GET":
+        coords = req.GET
+        lat = coords.get('lat')
+        lon = coords.get('lon')
+        snapshot = ref.get()
+        users = list(snapshot.keys())
+        curr_lat = float(lat)
+        curr_lon = float(lon)
+        nearby = {}
+        for user in users:
+            coords = snapshot.get(user).get("location")
+            lat = float(coords.get("lat"))
+            lon = float(coords.get("lon"))
+            dist = haversine_formula(curr_lat, curr_lon, lat, lon)
+            if(dist < 4):
+                payload = {
+                    "username" : snapshot.get(user).get('username'),
+                    "profile_picture" : snapshot.get(user).get('profile_picture'),
+                    "name" : snapshot.get(user).get('name'),
+                    "bio_status" : snapshot.get(user).get('bio_status')
+                }
+                nearby.update({user: payload})
+        return JsonResponse({"suggestion": nearby})
     return JsonResponse({"status": 500})

@@ -12,7 +12,13 @@ from google.cloud import storage
 
 raw_env = os.getenv("FIREBASE_SERVICE_ACCOUNT")
 service_account_info = json.loads(raw_env.encode('utf-8').decode('unicode_escape'))
-print(service_account_info)
+# print(service_account_info)
+
+# # Testing
+# file = open('./sk.json', 'r')
+# service_account_info = json.load(file)
+
+
 cred = credentials.Certificate(service_account_info)
 
 if not firebase_admin._apps:

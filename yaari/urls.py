@@ -25,6 +25,7 @@ from resolver.views import yaari_hoax_auditor
 from resolver.views import yaari_action_notify
 from resolver.views import yaari_two_step_verification
 from resolver.views import yaari_two_step_verify
+from resolver.views import yaari_suggestions
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -36,5 +37,6 @@ urlpatterns = [
     path('yaari_hoax_auditor/', yaari_hoax_auditor, name="yaari_hoax_auditor"),
     path('yaari_action_notify/', yaari_action_notify, name="yaari_action_notify"),
     path('yaari_two_step_verification/', yaari_two_step_verification, name="yaari_two_step_verification"),
-    path('yaari_two_step_verify/', yaari_two_step_verify, name="yaari_two_step_verify") 
+    path('yaari_two_step_verify/', yaari_two_step_verify, name="yaari_two_step_verify"),
+    path('yaari_suggestions/', yaari_suggestions, name="yaari_suggestions") 
 ]
