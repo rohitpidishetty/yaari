@@ -21,7 +21,6 @@ from resolver.views import yaari_assoc
 from resolver.views import yaari_de_assoc
 from resolver.views import yaari_assoc_chat_id
 from resolver.views import yaari_notify
-from resolver.views import yaari_hoax_auditor
 from resolver.views import yaari_action_notify
 from resolver.views import yaari_two_step_verification
 from resolver.views import yaari_two_step_verify
@@ -35,10 +34,10 @@ urlpatterns = [
     path('de_assoc/', yaari_de_assoc, name="yaari_de_assoc"),
     path('assoc_chat_id/', yaari_assoc_chat_id, name="yaari_assoc_chat_id"),
     path('yaari_notify/', yaari_notify, name="yaari_notify"),
-    path('yaari_hoax_auditor/', yaari_hoax_auditor, name="yaari_hoax_auditor"),
     path('yaari_action_notify/', yaari_action_notify, name="yaari_action_notify"),
     path('yaari_two_step_verification/', yaari_two_step_verification, name="yaari_two_step_verification"),
     path('yaari_two_step_verify/', yaari_two_step_verify, name="yaari_two_step_verify"),
     path('yaari_suggestions/', yaari_suggestions, name="yaari_suggestions"),
     path('yaari_image_upload/', yaari_image_upload, name="yaari_image_upload") 
 ]
+
