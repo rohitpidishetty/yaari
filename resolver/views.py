@@ -424,7 +424,7 @@ def yaari_image_upload(request):
                 {"status": 400, "message": "No file uploaded"}, status=400
             )
         file_ext = str(image.name).split(".")[-1].lower()
-        content_type = mimetypes.guess_type(f"file.{file_ext}")[0]
+        content_type = "application/octet-stream"
         if content_type is None:
             content_type = "application/octet-stream"
         print("POST =>", request.POST)
@@ -449,5 +449,6 @@ def yaari_image_upload(request):
 
     except Exception as e:
         return JsonResponse({"status": 400, "message": str(e)})
+
 
 
