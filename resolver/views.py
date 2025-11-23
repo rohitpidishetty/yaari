@@ -427,6 +427,8 @@ def yaari_image_upload(request):
         content_type = mimetypes.guess_type(f"file.{file_ext}")[0]
         if content_type is None:
             content_type = "application/octet-stream"
+        print("POST =>", request.POST)
+        print("FILES =>", request.FILES)
         file_name = f"{request.POST.get('folder')}/{uuid.uuid4()}.{file_ext}"
         s3 = boto3.client(
             "s3",
@@ -447,4 +449,5 @@ def yaari_image_upload(request):
 
     except Exception as e:
         return JsonResponse({"status": 400, "message": str(e)})
+
 
