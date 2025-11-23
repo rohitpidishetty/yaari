@@ -429,7 +429,14 @@ def yaari_image_upload(request):
             content_type = "application/octet-stream"
         print("POST =>", request.POST)
         print("FILES =>", request.FILES)
+        
         file_name = f"{request.POST.get('folder')}/{uuid.uuid4()}.{file_ext}"
+        print("DEBUG bucket =", settings.AWS_STORAGE_BUCKET_NAME)
+        print("DEBUG key =", file_name)
+        print("DEBUG content_type =", content_type)
+        print("DEBUG access_key =", settings.AWS_ACCESS_KEY_ID)
+        print("DEBUG secret_key =", settings.AWS_SECRET_ACCESS_KEY)
+        print("DEBUG region =", settings.AWS_S3_REGION_NAME)
         s3 = boto3.client(
             "s3",
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -449,6 +456,7 @@ def yaari_image_upload(request):
 
     except Exception as e:
         return JsonResponse({"status": 400, "message": str(e)})
+
 
 
 
