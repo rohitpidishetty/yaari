@@ -19,88 +19,94 @@ from django.views.decorators.http import require_http_methods
 # from tensorflow.keras.preprocessing.text import Tokenizer
 # from tensorflow.keras.preprocessing import sequence
 
-raw_env = os.getenv("FIREBASE_SERVICE_ACCOUNT")
-service_account_info = json.loads(raw_env.encode('utf-8').decode('unicode_escape'))
+# raw_env = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+# service_account_info = json.loads(raw_env.encode('utf-8').decode('unicode_escape'))
 
 
-# # Testing
-# file = open('./sk.json', 'r')
-# service_account_info = json.load(file)
+# Testing
+file = open("./service_acc.json", "r")
+service_account_info = json.load(file)
 
 cred = credentials.Certificate(service_account_info)
 
 if not firebase_admin._apps:
-    firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://yaari-jud-default-rtdb.firebaseio.com/'
-    })
+    firebase_admin.initialize_app(
+        cred, {"databaseURL": "https://yaari-jud-default-rtdb.firebaseio.com/"}
+    )
 
-ref = db.reference('users/')
+ref = db.reference("users/")
+
 
 def get_access_token():
     credentials = service_account.Credentials.from_service_account_info(
-        service_account_info, scopes=['https://www.googleapis.com/auth/firebase.messaging']
+        service_account_info,
+        scopes=["https://www.googleapis.com/auth/firebase.messaging"],
     )
     credentials.refresh(Request())
     return credentials.token
 
-def notify(token, title, body):
-  access_token = get_access_token()
-  url = f'https://fcm.googleapis.com/v1/projects/yaari-jud/messages:send'
-  headers = {
-    'Authorization': f'Bearer {access_token}',
-    'Content-Type': 'application/json; UTF-8',
-  }
-  payload = {
-  "message": {
-    "token": token,
-      "notification": {
-        "title": title,
-        "body": body,
-      },
-      "webpush": {
-        "notification": {
-        "icon": "https://yaari-jud.web.app/assets/logo.png"
-        }
-      }
-    }
-  }
 
-  return requests.post(url, headers=headers, data=json.dumps(payload))
+def notify(token, title, body):
+    access_token = get_access_token()
+    url = f"https://fcm.googleapis.com/v1/projects/yaari-jud/messages:send"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json; UTF-8",
+    }
+    payload = {
+        "message": {
+            "token": token,
+            "notification": {
+                "title": title,
+                "body": body,
+            },
+            "webpush": {
+                "notification": {"icon": "https://yaari-jud.web.app/assets/logo.png"}
+            },
+        }
+    }
+
+    return requests.post(url, headers=headers, data=json.dumps(payload))
+
 
 @csrf_exempt
 def yaari_assoc(req):
     if req.method == "POST":
         try:
-            payload = req.body.decode('utf-8')
+            payload = req.body.decode("utf-8")
             json_req = json.loads(payload)
-            friend_name = json_req['union']['friend']['name']
-            friend_dp = json_req['union']['friend']['dp']
-            friend_req_id = json_req['union']['friend']['req_id']
+            friend_name = json_req["union"]["friend"]["name"]
+            friend_dp = json_req["union"]["friend"]["dp"]
+            friend_req_id = json_req["union"]["friend"]["req_id"]
             friend_name_id = hashlib.md5(friend_name.encode()).hexdigest()
-            with_name = json_req['union']['with']['name']
-            with_dp = json_req['union']['with']['dp']
-            with_device_id = json_req['union']['with']['deviceId']
+            with_name = json_req["union"]["with"]["name"]
+            with_dp = json_req["union"]["with"]["dp"]
+            with_device_id = json_req["union"]["with"]["deviceId"]
             with_name_id = hashlib.md5(with_name.encode()).hexdigest()
 
             with_payload = {
                 with_name_id: {
                     "name": with_name,
                     "dp": with_dp,
-                    "friendId": with_name_id
+                    "friendId": with_name_id,
                 }
             }
             friend_payload = {
                 friend_name_id: {
                     "name": friend_name,
                     "dp": friend_dp,
-                    "friendId": friend_name_id
+                    "friendId": friend_name_id,
                 }
             }
 
             ref.child(f"{with_name}/friends").update(friend_payload)
             ref.child(f"{friend_name}/friends").update(with_payload)
 
-            res = notify(with_device_id, 'Hey Yaari', f"{friend_name} has accepted your friend request")
+            res = notify(
+                with_device_id,
+                "Hey Yaari",
+                f"{friend_name} has accepted your friend request",
+            )
 
             data = ref.child(f"{friend_name}/notifications/").get() or {}
             mag = len(data)
@@ -114,43 +120,51 @@ def yaari_assoc(req):
             return JsonResponse({"status": 400, "error": str(e)})
     return JsonResponse({"status": 500})
 
+
 @csrf_exempt
 def yaari_assoc_req(req):
     if req.method == "POST":
         try:
-            payload = req.body.decode('utf-8')
+            payload = req.body.decode("utf-8")
             json_req = json.loads(payload)
-            _from_ = json_req['from']
-            _to_ = json_req['to']
-            req_id = hashlib.md5(_from_['name'].encode()).hexdigest()
-            ref.child(f"{_to_['name']}/notifications").update({
-                req_id: {
-                    "from": _from_['name'],
-                    "deviceId": _from_['deviceId'],
-                    "profile_picture": _from_['dp'],
-                    "req_id": req_id,
+            _from_ = json_req["from"]
+            _to_ = json_req["to"]
+            req_id = hashlib.md5(_from_["name"].encode()).hexdigest()
+            ref.child(f"{_to_['name']}/notifications").update(
+                {
+                    req_id: {
+                        "from": _from_["name"],
+                        "deviceId": _from_["deviceId"],
+                        "profile_picture": _from_["dp"],
+                        "req_id": req_id,
+                    }
                 }
-            })
+            )
             user_data = ref.child(f"{_to_['name']}").get() or {}
             count = user_data.get("new_notifications_count", 0)
             ref.child(f"{_to_['name']}").update({"new_notifications_count": count + 1})
 
-            res = notify(_to_['deviceId'], 'Hey Yaari', f"{_from_['name']} has sent you a friend request")
+            res = notify(
+                _to_["deviceId"],
+                "Hey Yaari",
+                f"{_from_['name']} has sent you a friend request",
+            )
 
             return JsonResponse({"status": 200, "notification": res.json()})
         except Exception as e:
             return JsonResponse({"status": 400, "error": str(e)})
     return JsonResponse({"status": 500})
 
+
 @csrf_exempt
 def yaari_de_assoc(req):
     if req.method == "POST":
         try:
-            payload = req.body.decode('utf-8')
+            payload = req.body.decode("utf-8")
             json_req = json.loads(payload)
-            friend_name_1 = json_req['from']['name']
+            friend_name_1 = json_req["from"]["name"]
             friend_id_1 = hashlib.md5(friend_name_1.encode()).hexdigest()
-            friend_name_2 = json_req['to']['name']
+            friend_name_2 = json_req["to"]["name"]
             friend_id_2 = hashlib.md5(friend_name_2.encode()).hexdigest()
 
             friend1 = ref.child(f"{friend_name_1}/friends").get() or {}
@@ -170,15 +184,16 @@ def yaari_de_assoc(req):
             return JsonResponse({"status": 400, "error": str(e)})
     return JsonResponse({"status": 500})
 
+
 @csrf_exempt
 def yaari_assoc_chat_id(req):
     if req.method == "POST":
         try:
-            body = req.body.decode('utf-8')
+            body = req.body.decode("utf-8")
             jsonified = json.loads(body)
-            chat_id = jsonified['chatId']
-            yaari1 = jsonified['convInitiator1']
-            yaari2 = jsonified['convInitiator2']
+            chat_id = jsonified["chatId"]
+            yaari1 = jsonified["convInitiator1"]
+            yaari2 = jsonified["convInitiator2"]
             ref.child(f"{yaari1}/messages/").update({chat_id: chat_id})
             ref.child(f"{yaari2}/messages/").update({chat_id: chat_id})
             return JsonResponse({"status": 200})
@@ -186,21 +201,24 @@ def yaari_assoc_chat_id(req):
             return JsonResponse({"status": 400, "error": str(e)})
     return JsonResponse({"status": 500})
 
+
 @csrf_exempt
 @require_http_methods(["POST", "OPTIONS"])
 def yaari_notify(req):
     if req.method == "OPTIONS":
         # Reply to preflight with 200 OK and empty body
         return JsonResponse({}, status=200)
-    
+
     if req.method == "POST":
         try:
-            body = req.body.decode('utf-8')
+            body = req.body.decode("utf-8")
             jsonified = json.loads(body)
-            device_id = jsonified['deviceId']
-            user_message = jsonified['user_message']
-            author = jsonified['author']
-            res = notify(device_id, f"Yaari, {author} has sent you a message", user_message)
+            device_id = jsonified["deviceId"]
+            user_message = jsonified["user_message"]
+            author = jsonified["author"]
+            res = notify(
+                device_id, f"Yaari, {author} has sent you a message", user_message
+            )
             return JsonResponse({"status": 200, "res": res.json()})
         except Exception as e:
             return JsonResponse({"status": 400, "error": str(e)})
@@ -208,16 +226,17 @@ def yaari_notify(req):
     # Fallback for other methods
     return JsonResponse({"status": 405, "error": "Method not allowed"})
 
+
 @csrf_exempt
 def yaari_action_notify(req):
     if req.method == "POST":
         try:
-            body = req.body.decode('utf-8')
+            body = req.body.decode("utf-8")
             data = json.loads(body)
-            by = data['by']
-            deviceId = data['deviceId']
-            type_ = data['type']
-            comment = data['comment']
+            by = data["by"]
+            deviceId = data["deviceId"]
+            type_ = data["type"]
+            comment = data["comment"]
             if type_ == "comment":
                 notify(deviceId, f"Yaari, {by} has commented on your post", comment)
             else:
@@ -227,13 +246,22 @@ def yaari_action_notify(req):
             return JsonResponse({"status": 500, "error": str(e)})
     return JsonResponse({"status": 500})
 
+
 def textProcessor(data):
     # Removes URLs, lowercases, removes whitespace and non-alphanumeric chars except spaces
-    url_filtered = re.sub(r'(?:(https|http)\s?:\/\/)(\s)*(www\.)?(\s)*((\w|\s)+\.)*([\w\-\s]+\/)*([\w\-]+)((\?)?[\w\s]*=\s*[\w\%&]*)*', '', data, flags=re.MULTILINE)
+    url_filtered = re.sub(
+        r"(?:(https|http)\s?:\/\/)(\s)*(www\.)?(\s)*((\w|\s)+\.)*([\w\-\s]+\/)*([\w\-]+)((\?)?[\w\s]*=\s*[\w\%&]*)*",
+        "",
+        data,
+        flags=re.MULTILINE,
+    )
     lowercased = url_filtered.lower()
-    no_newlines = lowercased.replace('\n', '')
-    processedData = ''.join(letter for letter in no_newlines if letter.isalnum() or letter == ' ')
+    no_newlines = lowercased.replace("\n", "")
+    processedData = "".join(
+        letter for letter in no_newlines if letter.isalnum() or letter == " "
+    )
     return processedData
+
 
 # Uncomment and fix when tensorflow is installed and model available
 # def predict(news):
@@ -248,13 +276,14 @@ def textProcessor(data):
 #     prediction = CNN_BiLSTM.predict(padded_seq)
 #     return 'real' if np.argmax(prediction, axis=-1) == 0 else 'fake'
 
+
 @csrf_exempt
 def yaari_hoax_auditor(req):
     if req.method == "POST":
         try:
-            body = req.body.decode('utf-8')
+            body = req.body.decode("utf-8")
             data = json.loads(body)
-            text = data['text']
+            text = data["text"]
             # For now, just echo the text since ML model is commented out
             # prediction = predict(text) + " news"
             return JsonResponse({"status": text})
@@ -262,14 +291,15 @@ def yaari_hoax_auditor(req):
             return JsonResponse({"status": 500, "error": str(e)})
     return JsonResponse({"status": 500})
 
+
 @csrf_exempt
 def yaari_two_step_verify(req):
     if req.method == "POST":
         try:
-            body = req.body.decode('utf-8')
+            body = req.body.decode("utf-8")
             data = json.loads(body)
-            otp = str(data['otp'])
-            user = data['username']
+            otp = str(data["otp"])
+            user = data["username"]
             sent_otp = str(ref.child(f"{user}/otp").get())
             if otp == sent_otp:
                 return JsonResponse({"status": 200})
@@ -278,6 +308,7 @@ def yaari_two_step_verify(req):
         except Exception as e:
             return JsonResponse({"status": 400, "error": str(e)})
     return JsonResponse({"status": 500})
+
 
 import random
 import smtplib
@@ -289,19 +320,20 @@ SMTP_PORT = 587
 EMAIL_ADDRESS = os.getenv("EMAIL")
 EMAIL_PASSWORD = os.getenv("EMAIL_KEY")
 
+
 @csrf_exempt
 def yaari_two_step_verification(req):
-    if req.method == 'POST':
-        body = json.loads(req.body.decode('utf-8'))
-        verify = body['verify_email']
-        username = body['username']
+    if req.method == "POST":
+        body = json.loads(req.body.decode("utf-8"))
+        verify = body["verify_email"]
+        username = body["username"]
         try:
             code = random.randint(10000, 99999)
             msg = MIMEMultipart()
             msg["From"] = EMAIL_ADDRESS
             msg["To"] = verify
             msg["Subject"] = "Yaari, 2 step email verification"
-            ref.child(f"{username}/").update({"otp":code})
+            ref.child(f"{username}/").update({"otp": code})
             message = f"""
             <html>
             <head>
@@ -361,7 +393,6 @@ def yaari_two_step_verification(req):
             </html>
             """
 
-
             msg.attach(MIMEText(message, "html"))
 
             # Send email
@@ -374,9 +405,10 @@ def yaari_two_step_verification(req):
             return JsonResponse({"status": 200})
 
         except Exception as e:
-            return JsonResponse({"status": 400, 'err': str(e)})
+            return JsonResponse({"status": 400, "err": str(e)})
 
     return JsonResponse({"status": 500})
+
 
 def haversine_formula(lat1, lon1, lat2, lon2):
     R = 6371.0
@@ -384,18 +416,22 @@ def haversine_formula(lat1, lon1, lat2, lon2):
     phi2 = math.radians(lat2)
     delta_phi = math.radians(lat2 - lat1)
     delta_lambda = math.radians(lon2 - lon1)
-    a = math.sin(delta_phi / 2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2)**2
+    a = (
+        math.sin(delta_phi / 2) ** 2
+        + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2) ** 2
+    )
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     distance = R * c
     # Returning distance in KM
     return distance
-  
+
+
 @csrf_exempt
 def yaari_suggestions(req):
     if req.method == "GET":
         coords = req.GET
-        lat = coords.get('lat')
-        lon = coords.get('lon')
+        lat = coords.get("lat")
+        lon = coords.get("lon")
         snapshot = ref.get()
         users = list(snapshot.keys())
         curr_lat = float(lat)
@@ -406,13 +442,58 @@ def yaari_suggestions(req):
             lat = float(coords.get("lat"))
             lon = float(coords.get("lon"))
             dist = haversine_formula(curr_lat, curr_lon, lat, lon)
-            if(dist < 4):
+            if dist < 4:
                 payload = {
-                    "username" : snapshot.get(user).get('username'),
-                    "profile_picture" : snapshot.get(user).get('profile_picture'),
-                    "name" : snapshot.get(user).get('name'),
-                    "bio_status" : snapshot.get(user).get('bio_status')
+                    "username": snapshot.get(user).get("username"),
+                    "profile_picture": snapshot.get(user).get("profile_picture"),
+                    "name": snapshot.get(user).get("name"),
+                    "bio_status": snapshot.get(user).get("bio_status"),
                 }
                 nearby.update({user: payload})
         return JsonResponse({"suggestion": nearby})
     return JsonResponse({"status": 500})
+
+
+import boto3
+from botocore.config import Config
+import uuid
+import mimetypes
+from django.conf import settings
+
+
+@csrf_exempt
+def yaari_image_upload(request):
+    if request.method != "POST":
+        return JsonResponse(
+            {"status": 405, "message": "Method not allowed"}, status=405
+        )
+    try:
+        image = request.FILES.get("image")
+        if not image:
+            return JsonResponse(
+                {"status": 400, "message": "No file uploaded"}, status=400
+            )
+        file_ext = str(image.name).split(".")[-1].lower()
+        content_type = mimetypes.guess_type(f"file.{file_ext}")[0]
+        if content_type is None:
+            content_type = "application/octet-stream"
+        file_name = f"{request.POST.get('folder')}/{uuid.uuid4()}.{file_ext}"
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_S3_REGION_NAME,
+            endpoint_url="https://s3.us-east-2.amazonaws.com",
+            config=Config(signature_version="s3v4"),
+        )
+        s3.upload_fileobj(
+            Fileobj=image,
+            Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+            Key=file_name,
+            ExtraArgs={"ACL": "public-read", "ContentType": content_type},
+        )
+        public_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.us-east-2.amazonaws.com/{file_name}"
+        return JsonResponse({"status": 200, "url": public_url})
+
+    except Exception as e:
+        return JsonResponse({"status": 400, "message": str(e)})

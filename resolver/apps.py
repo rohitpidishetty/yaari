@@ -10,28 +10,31 @@ from google.oauth2 import service_account
 from google.cloud import storage
 
 
-raw_env = os.getenv("FIREBASE_SERVICE_ACCOUNT")
-service_account_info = json.loads(raw_env.encode('utf-8').decode('unicode_escape'))
+# raw_env = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+# service_account_info = json.loads(raw_env.encode('utf-8').decode('unicode_escape'))
 # print(service_account_info)
 
-# # Testing
-# file = open('./sk.json', 'r')
-# service_account_info = json.load(file)
+# Testing
+file = open("./service_acc.json", "r")
+service_account_info = json.load(file)
 
 
 cred = credentials.Certificate(service_account_info)
 
 if not firebase_admin._apps:
-    firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://yaari-jud-default-rtdb.firebaseio.com/'
-    })
+    firebase_admin.initialize_app(
+        cred, {"databaseURL": "https://yaari-jud-default-rtdb.firebaseio.com/"}
+    )
 
-credentials_gcs = service_account.Credentials.from_service_account_info(service_account_info)
-client = storage.Client(project='yaari-jud', credentials=credentials_gcs)
+credentials_gcs = service_account.Credentials.from_service_account_info(
+    service_account_info
+)
+client = storage.Client(project="yaari-jud", credentials=credentials_gcs)
 
-ref = db.reference('convos/')
+ref = db.reference("convos/")
 
 last_run_date = None
+
 
 def auto_deletion():
     global last_run_date
@@ -49,7 +52,10 @@ def auto_deletion():
                     bucket = client.get_bucket(bucket_name)
                     blobs = bucket.list_blobs()
                     for b in blobs:
-                        if b.name.startswith('YaariChatUploads') and b.name != 'YaariChatUploads/':
+                        if (
+                            b.name.startswith("YaariChatUploads")
+                            and b.name != "YaariChatUploads/"
+                        ):
                             b.delete()
                     print(f"Auto-deletion completed at {now}")
                     last_run_date = today
@@ -63,9 +69,10 @@ def auto_deletion():
 auto_deletion_started = False
 auto_deletion_lock = threading.Lock()
 
+
 class ResolverConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'resolver'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "resolver"
 
     def ready(self):
         global auto_deletion_started
