@@ -14,18 +14,13 @@ import sys
 from google.auth.transport.requests import Request
 from django.views.decorators.http import require_http_methods
 
-# ML imports commented out — uncomment if you add tensorflow and keras dependencies
-# import tensorflow as tf
-# from tensorflow.keras.preprocessing.text import Tokenizer
-# from tensorflow.keras.preprocessing import sequence
-
-# raw_env = os.getenv("FIREBASE_SERVICE_ACCOUNT")
-# service_account_info = json.loads(raw_env.encode('utf-8').decode('unicode_escape'))
+raw_env = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+service_account_info = json.loads(raw_env.encode('utf-8').decode('unicode_escape'))
 
 
 # Testing
-file = open("./service_acc.json", "r")
-service_account_info = json.load(file)
+# file = open("./service_acc.json", "r")
+# service_account_info = json.load(file)
 
 cred = credentials.Certificate(service_account_info)
 
@@ -247,51 +242,6 @@ def yaari_action_notify(req):
     return JsonResponse({"status": 500})
 
 
-def textProcessor(data):
-    # Removes URLs, lowercases, removes whitespace and non-alphanumeric chars except spaces
-    url_filtered = re.sub(
-        r"(?:(https|http)\s?:\/\/)(\s)*(www\.)?(\s)*((\w|\s)+\.)*([\w\-\s]+\/)*([\w\-]+)((\?)?[\w\s]*=\s*[\w\%&]*)*",
-        "",
-        data,
-        flags=re.MULTILINE,
-    )
-    lowercased = url_filtered.lower()
-    no_newlines = lowercased.replace("\n", "")
-    processedData = "".join(
-        letter for letter in no_newlines if letter.isalnum() or letter == " "
-    )
-    return processedData
-
-
-# Uncomment and fix when tensorflow is installed and model available
-# def predict(news):
-#     news = textProcessor(news)
-#     news = news.lower()
-#     tokenizer = Tokenizer(num_words=50, filters='!"#$%&()*+,-./:;<=>?@[\\]^_{|}~\t\n-', split=' ', char_level=False, oov_token=None, document_count=0)
-#     tokenizer.fit_on_texts([news])
-#     _dir_ = os.path.join(BASE_DIR, 'CNNBiLSTM_Model.h5')
-#     CNN_BiLSTM = tf.keras.models.load_model(_dir_)
-#     sequences = tokenizer.texts_to_sequences([news])
-#     padded_seq = sequence.pad_sequences(sequences, value=0.0, padding='post', maxlen=50)
-#     prediction = CNN_BiLSTM.predict(padded_seq)
-#     return 'real' if np.argmax(prediction, axis=-1) == 0 else 'fake'
-
-
-@csrf_exempt
-def yaari_hoax_auditor(req):
-    if req.method == "POST":
-        try:
-            body = req.body.decode("utf-8")
-            data = json.loads(body)
-            text = data["text"]
-            # For now, just echo the text since ML model is commented out
-            # prediction = predict(text) + " news"
-            return JsonResponse({"status": text})
-        except Exception as e:
-            return JsonResponse({"status": 500, "error": str(e)})
-    return JsonResponse({"status": 500})
-
-
 @csrf_exempt
 def yaari_two_step_verify(req):
     if req.method == "POST":
@@ -497,3 +447,4 @@ def yaari_image_upload(request):
 
     except Exception as e:
         return JsonResponse({"status": 400, "message": str(e)})
+
