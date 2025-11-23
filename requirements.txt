@@ -24,4 +24,5 @@ urllib3==2.3.0
 Django==5.2.3
 django-cors-headers==4.7.0
 numpy>=1.26.4
-
+boto3==1.41.2
+django-storages==1.14.6
