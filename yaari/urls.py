@@ -26,6 +26,7 @@ from resolver.views import yaari_two_step_verification
 from resolver.views import yaari_two_step_verify
 from resolver.views import yaari_suggestions
 from resolver.views import yaari_image_upload
+from resolver.views import yaari_image_upload_chunk
 
 urlpatterns = [
     path('admin/', admin.site.urls),
