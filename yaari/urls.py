@@ -26,7 +26,6 @@ from resolver.views import yaari_two_step_verification
 from resolver.views import yaari_two_step_verify
 from resolver.views import yaari_suggestions
 from resolver.views import yaari_image_upload
-from resolver.views import yaari_image_upload_chunk
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -39,7 +38,6 @@ urlpatterns = [
     path('yaari_two_step_verification/', yaari_two_step_verification, name="yaari_two_step_verification"),
     path('yaari_two_step_verify/', yaari_two_step_verify, name="yaari_two_step_verify"),
     path('yaari_suggestions/', yaari_suggestions, name="yaari_suggestions"),
-    path('yaari_image_upload/', yaari_image_upload, name="yaari_image_upload"),
-    path('yaari_image_upload_chunk/', yaari_image_upload_chunk, name="yaari_image_upload_chunk") 
+    path('yaari_image_upload/', yaari_image_upload, name="yaari_image_upload")
 ]
 
