@@ -27,6 +27,7 @@ from resolver.views import yaari_two_step_verify
 from resolver.views import yaari_suggestions
 from resolver.views import yaari_image_upload
 from resolver.views import generate_presigned_url
+from resolver.views import generate_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -40,6 +41,7 @@ urlpatterns = [
     path('yaari_two_step_verify/', yaari_two_step_verify, name="yaari_two_step_verify"),
     path('yaari_suggestions/', yaari_suggestions, name="yaari_suggestions"),
     path('yaari_image_upload/', yaari_image_upload, name="yaari_image_upload"),
-    path('generate_presigned_url/', generate_presigned_url, name="generate_presigned_url")
+    path('generate_presigned_url/', generate_presigned_url, name="generate_presigned_url"),
+    path('generate_token/', generate_token, name="generate_token")
 ]
 
