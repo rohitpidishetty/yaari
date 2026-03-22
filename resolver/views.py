@@ -458,13 +458,13 @@ def yaari_image_upload(request):
     except Exception as e:
         return JsonResponse({"status": 400, "message": str(e)})
 
-
 @csrf_exempt
 def generate_presigned_url(request):
     file_name = request.GET.get("filename")
     if not file_name:
         return JsonResponse({"status": 400, "message": "No filename provided"}, status=400)
 
+    file_content_type = request.GET.get("content_type", "image/jpeg")
     key = f"YaariUploads/{uuid.uuid4()}_{file_name}"
 
     s3 = boto3.client(
@@ -480,12 +480,12 @@ def generate_presigned_url(request):
         Params={
             "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
             "Key": key,
-            "ACL": "public-read",
-            "ContentType": "image/jpeg"
+            "ACL": "public-read",            
+            "ContentType": file_content_type
         },
         ExpiresIn=3600
     )
 
-    public_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.us-east-2.amazonaws.com/{key}"
+    public_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{key}"
 
     return JsonResponse({"uploadUrl": url, "publicUrl": public_url})
