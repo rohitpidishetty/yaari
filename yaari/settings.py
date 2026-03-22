@@ -121,6 +121,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://yaari-jud.web.app",
     "https://yaari-dba.web.app",
     "http://localhost:3000",  # Testing
+    "https://192.168.0.8:3000",  # Testing
 ]
 
 CORS_ALLOW_METHODS = [
