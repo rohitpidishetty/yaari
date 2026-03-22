@@ -488,3 +488,19 @@ def generate_presigned_url(request):
     public_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{key}"
 
     return JsonResponse({"uploadUrl": url, "publicUrl": public_url})
+
+
+from getstream import Stream
+@csrf_exempt
+def generate_token(req):
+    if req.method == "GET":
+        try:
+            name = req.GET.get("username")
+            apiKey = os.getenv("STREAM_API_KEY")
+            apiSecret = os.getenv("STREAM_API_SECRET")
+            client = Stream(api_key=apiKey, api_secret=apiSecret, timeout=3.0)
+            token = client.create_token(user_id=f"{name}")
+            return JsonResponse({"token":token})
+        except Exception as e:
+            return JsonResponse({"message": str(e)})
+    return JsonResponse({"message":0})
