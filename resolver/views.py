@@ -479,8 +479,7 @@ def generate_presigned_url(request):
         ClientMethod="put_object",
         Params={
             "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
-            "Key": key,
-            "ACL": "public-read",            
+            "Key": key,       
             "ContentType": file_content_type
         },
         ExpiresIn=3600
