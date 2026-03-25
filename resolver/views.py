@@ -519,7 +519,7 @@ def get_signed_url(request):
         region_name=settings.AWS_S3_REGION_NAME,
         config=Config(signature_version="s3v4"),
     )
-     url = s3.generate_presigned_url(
+    url = s3.generate_presigned_url(
         ClientMethod="get_object",
         Params={
             "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
