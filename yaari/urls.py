@@ -28,6 +28,7 @@ from resolver.views import yaari_suggestions
 from resolver.views import yaari_image_upload
 from resolver.views import generate_presigned_url
 from resolver.views import generate_token
+from resolver.views import get_signed_url
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -42,6 +43,7 @@ urlpatterns = [
     path('yaari_suggestions/', yaari_suggestions, name="yaari_suggestions"),
     path('yaari_image_upload/', yaari_image_upload, name="yaari_image_upload"),
     path('generate_presigned_url/', generate_presigned_url, name="generate_presigned_url"),
-    path('generate_token/', generate_token, name="generate_token")
+    path('generate_token/', generate_token, name="generate_token"),
+    path('get_signed_url/', get_signed_url, name="get_signed_url")
 ]
 
