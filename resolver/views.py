@@ -504,3 +504,17 @@ def generate_token(req):
         except Exception as e:
             return JsonResponse({"message": str(e)})
     return JsonResponse({"message":0})
+
+
+@csrf_exempt
+def get_signed_url(request):
+    full_url = request.GET.get("url")  
+    parsed = urlparse(full_url)
+    key = parsed.path.lstrip("/")  
+    s3 = boto3.client("s3")
+    signed_url = s3.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": "yaari-jud", "Key": key},
+        ExpiresIn=300  
+    )
+    return JsonResponse({"signedUrl": signed_url})
