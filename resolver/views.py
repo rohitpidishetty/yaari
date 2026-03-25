@@ -13,6 +13,7 @@ from google.oauth2 import service_account
 import sys
 import uuid
 from google.auth.transport.requests import Request
+from urllib.parse import urlparse
 from django.views.decorators.http import require_http_methods
 
 raw_env = os.getenv("FIREBASE_SERVICE_ACCOUNT")
