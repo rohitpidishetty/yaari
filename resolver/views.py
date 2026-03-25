@@ -512,10 +512,19 @@ def get_signed_url(request):
     full_url = request.GET.get("url")  
     parsed = urlparse(full_url)
     key = parsed.path.lstrip("/")  
-    s3 = boto3.client("s3")
-    signed_url = s3.generate_presigned_url(
-        "get_object",
-        Params={"Bucket": "yaari-jud", "Key": key},
-        ExpiresIn=300  
+    s3 = boto3.client(
+        "s3",
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name=settings.AWS_S3_REGION_NAME,
+        config=Config(signature_version="s3v4"),
     )
-    return JsonResponse({"signedUrl": signed_url})
+     url = s3.generate_presigned_url(
+        ClientMethod="get_object",
+        Params={
+            "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
+            "Key": key
+        },
+        ExpiresIn=3600
+    )
+    return JsonResponse({"signedUrl": url})
