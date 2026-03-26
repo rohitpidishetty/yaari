@@ -487,7 +487,6 @@ def generate_presigned_url(request):
     )
 
     public_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{key}"
-
     return JsonResponse({"uploadUrl": url, "publicUrl": public_url})
 
 
