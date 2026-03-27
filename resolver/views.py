@@ -524,6 +524,6 @@ def get_signed_url(request):
             "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
             "Key": key
         },
-        ExpiresIn=3600
+        ExpiresIn=1300
     )
     return JsonResponse({"signedUrl": url})
